@@ -991,6 +991,31 @@ function updateExtStatus() {
   }
 }
 
+/** Wartet kurz auf eine Antwort der Erweiterung (falls sie beim Laden noch nicht erkannt wurde). */
+function waitForExtension(ms = 1500) {
+  if (ext.available) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const end = Date.now() + ms;
+    const tick = () => {
+      if (ext.available) return resolve(true);
+      if (Date.now() > end) return resolve(false);
+      window.postMessage({ __sm: 'app', type: 'PING' }, location.origin);
+      setTimeout(tick, 250);
+    };
+    tick();
+  });
+}
+
+/** Button „Öffnen“: mit Erweiterung öffnen + ausfüllen, sonst nur die Seite öffnen. */
+async function openAndFill(item, site) {
+  if (await waitForExtension()) return fillViaExtension(item, site);
+  const w = window.open(getSettings().siteUrls[site], '_blank');
+  if (w) { try { w.opener = null; } catch (_) { /* ignorieren */ } }
+  toast(w === null
+    ? 'Seite konnte nicht geöffnet werden (Pop-up-Blocker?).'
+    : `${SITES[site].label} geöffnet – Erweiterung nicht erkannt, bitte per Kopieren ausfüllen.`, w === null ? 'err' : 'ok', 6000);
+}
+
 async function fillViaExtension(item, site) {
   busy(true, 'Daten werden an die Erweiterung übergeben …');
   try {
@@ -1113,11 +1138,10 @@ async function renderPublish(id) {
           <h2>${SITES[site].label}</h2>
           <label class="posted-toggle"><input type="checkbox" data-a="posted" ${posted ? 'checked' : ''}> eingestellt</label>
         </div>
-        ${ext.available ? `<button class="btn block ${site}" data-a="fill" type="button">Öffnen &amp; automatisch ausfüllen</button>` : ''}
+        <button class="btn block ${site}" data-a="fill" type="button">${ext.available ? '↗ Öffnen &amp; automatisch ausfüllen' : `↗ ${esc(SITES[site].label)} öffnen`}</button>
         <div class="btn-row">
           ${canShareFiles ? `<button class="btn small" data-a="share" type="button" ${nImg ? '' : 'disabled'}>📤 Fotos teilen</button>` : ''}
           <button class="btn small" data-a="download" type="button" ${nImg ? '' : 'disabled'}>⬇️ Fotos speichern</button>
-          <a class="btn small" href="${esc(getSettings().siteUrls[site])}" target="_blank" rel="noopener">↗ Öffnen</a>
         </div>
         <div class="copy-grid">
           <button class="btn" data-a="copy-title" type="button">Titel</button>
@@ -1140,7 +1164,7 @@ async function renderPublish(id) {
   $$('.site-card', root).forEach((card) => {
     const site = card.dataset.site;
     const on = (a, fn) => { const el = card.querySelector(`[data-a=${a}]`); if (el) el.onclick = fn; };
-    on('fill', () => fillViaExtension(item, site));
+    on('fill', () => openAndFill(item, site));
     on('share', () => shareImages(item));
     on('download', () => downloadImages(item));
     on('copy-title', () => copyText(item.name || '', 'Titel'));
