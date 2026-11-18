@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a9ea6">
+<meta name="sales-manager-app" content="1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Sales Manager">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+<title>Sales Manager</title>
+</head>
+<body>
+<header class="appbar">
+  <button id="nav-back" class="icon-btn" type="button" aria-label="Zurück" hidden>‹</button>
+  <h1 id="appbar-title">Sales Manager</h1>
+  <button id="nav-install" class="chip-btn" type="button" hidden>App installieren</button>
+  <button id="nav-settings" class="icon-btn" type="button" aria-label="Einstellungen">⚙︎</button>
+</header>
+
+<main>
+  <!-- ============ LISTE ============ -->
+  <section id="view-list" class="view">
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Artikel suchen …" autocomplete="off">
+      <div class="seg" id="filter-seg" role="tablist">
+        <button type="button" data-filter="active" class="on">Aktiv</button>
+        <button type="button" data-filter="sold">Verkauft</button>
+        <button type="button" data-filter="all">Alle</button>
+      </div>
+    </div>
+    <div id="list" class="list"></div>
+    <div id="empty" class="empty" hidden></div>
+    <button id="fab-new" class="fab" type="button">＋ Neuer Artikel</button>
+  </section>
+
+  <!-- ============ EDITOR ============ -->
+  <section id="view-editor" class="view" hidden>
+    <div class="card">
+      <div class="card-head">
+        <h2>Fotos</h2>
+        <span id="img-count" class="muted"></span>
+      </div>
+      <div class="btn-row three">
+        <button id="btn-camera" class="btn primary" type="button">📷 Kamera</button>
+        <button id="btn-syscam" class="btn" type="button">📱 Foto-App</button>
+        <button id="btn-gallery" class="btn" type="button">🖼️ Galerie</button>
+      </div>
+      <div id="thumbs" class="thumbs"></div>
+      <p class="hint">„Kamera“: mehrere Fotos am Stück aufnehmen. Foto antippen zum Vergrößern &amp; Drehen. Das erste Foto ist das Titelbild.</p>
+    </div>
+
+    <div class="card">
+      <h2>KI-Assistent</h2>
+      <label class="field">Zustand
+        <select id="f-condition">
+          <option value="">Bitte auswählen</option>
+          <option value="neu mit Etikett">neu mit Etikett</option>
+          <option value="neu">neu</option>
+          <option value="sehr gut">sehr gut</option>
+          <option value="gut">gut</option>
+          <option value="zufriedenstellend">zufriedenstellend</option>
+        </select>
+      </label>
+      <label class="field">Stichpunkte für die KI <span class="muted">(optional)</span>
+        <textarea id="f-hints" rows="2" placeholder="z.B. Marke, Größe, kleiner Kratzer an der Seite"></textarea>
+      </label>
+      <button id="btn-ai" class="btn accent block" type="button">✨ Titel, Beschreibung &amp; Preis generieren</button>
+      <div id="ai-info" class="info" hidden></div>
+    </div>
+
+    <div class="card">
+      <h2>Anzeige</h2>
+      <label class="field">Titel <span id="name-count" class="muted right"></span>
+        <input id="f-name" type="text" maxlength="80" autocomplete="off" placeholder="z.B. Nike Air Max 90 | Gr. 42 | Weiß">
+      </label>
+      <label class="field">Preis in €
+        <input id="f-price" type="text" inputmode="decimal" autocomplete="off" placeholder="z.B. 12,50">
+      </label>
+      <div class="compare">
+        <div class="compare-head">Vergleichspreise prüfen <span class="muted">(kostenlos)</span></div>
+        <input id="f-query" type="text" autocomplete="off" placeholder="Suchbegriff, z.B. Nike Air Max 90 42">
+        <div class="btn-row wrap" id="compare-links">
+          <a class="btn small" data-site="ebay" target="_blank" rel="noopener">eBay verkauft</a>
+          <a class="btn small" data-site="kleinanzeigen" target="_blank" rel="noopener">Kleinanzeigen</a>
+          <a class="btn small" data-site="vinted" target="_blank" rel="noopener">Vinted</a>
+          <a class="btn small" data-site="idealo" target="_blank" rel="noopener">Neupreis (idealo)</a>
+        </div>
+      </div>
+      <label class="field">Beschreibung
+        <textarea id="f-desc" rows="9" placeholder="Beschreibung"></textarea>
+      </label>
+    </div>
+
+    <div class="sticky-actions">
+      <button id="btn-cancel" class="btn" type="button">Abbrechen</button>
+      <button id="btn-save" class="btn primary" type="button">Speichern</button>
+    </div>
+  </section>
+
+  <!-- ============ INSERIEREN ============ -->
+  <section id="view-publish" class="view" hidden>
+    <div id="publish-content"></div>
+  </section>
+
+  <!-- ============ EINSTELLUNGEN ============ -->
+  <section id="view-settings" class="view" hidden>
+    <div class="card">
+      <h2>KI (Google Gemini)</h2>
+      <label class="field">API-Key
+        <input id="s-apikey" type="password" autocomplete="off" placeholder="Gemini API-Key">
+      </label>
+      <p class="hint">Der Key bleibt nur auf diesem Gerät gespeichert und wird ausschließlich an die Gemini-API gesendet. Kostenlos erhältlich unter aistudio.google.com.</p>
+      <label class="field">Modell
+        <input id="s-model" type="text" list="model-list" autocomplete="off">
+        <datalist id="model-list">
+          <option value="gemini-3.1-flash-lite"></option>
+          <option value="gemini-2.5-flash"></option>
+          <option value="gemini-2.5-flash-lite"></option>
+        </datalist>
+      </label>
+      <label class="check">
+        <input id="s-grounding" type="checkbox">
+        <span>Google-Suche für Preisrecherche nutzen</span>
+      </label>
+      <p class="hint">Nur mit kostenpflichtigem Gemini-Kontingent sinnvoll. Ist es aus, schätzt die KI den Preis und du prüfst ihn über die Vergleichslinks (eBay-Verkaufspreise, Kleinanzeigen, Vinted). Schlägt die Suche fehl, wird automatisch ohne Suche weitergemacht.</p>
+      <label class="field">Allgemeiner KI-Prompt
+        <textarea id="s-prompt" rows="6"></textarea>
+      </label>
+      <button id="s-prompt-reset" class="btn small" type="button">Standard-Prompt wiederherstellen</button>
+    </div>
+
+    <div class="card">
+      <h2>Kamera</h2>
+      <label class="check">
+        <input id="s-fullres" type="checkbox">
+        <span>Volle Sensor-Auflösung (beste Qualität, etwas langsamer)</span>
+      </label>
+      <p class="hint">Fotos werden mit max. 2560 px Kantenlänge und hoher JPEG-Qualität gespeichert. Für maximale Qualität kannst du auch „Foto-App“ nutzen – dann fotografiert die normale Kamera-App deines Handys.</p>
+    </div>
+
+    <div class="card">
+      <h2>Formular-Adressen</h2>
+      <label class="field">Vinted <input id="s-url-vinted" type="url"></label>
+      <label class="field">Kleinanzeigen <input id="s-url-kleinanzeigen" type="url"></label>
+      <label class="field">eBay <input id="s-url-ebay" type="url"></label>
+    </div>
+
+    <div class="card">
+      <h2>Browser-Erweiterung (PC)</h2>
+      <p id="ext-status" class="hint">Prüfe Verbindung …</p>
+      <button id="s-legacy-import" class="btn small" type="button" hidden>Artikel aus alter Erweiterung übernehmen</button>
+    </div>
+
+    <div class="card">
+      <h2>Datensicherung</h2>
+      <p class="hint">Alle Artikel liegen lokal auf diesem Gerät. Mit Export/Import kannst du sie sichern oder auf ein anderes Gerät übertragen (ohne API-Key).</p>
+      <div class="btn-row">
+        <button id="s-export" class="btn small" type="button">Exportieren</button>
+        <button id="s-import" class="btn small" type="button">Importieren</button>
+      </div>
+      <p id="storage-info" class="hint"></p>
+    </div>
+
+    <div class="sticky-actions">
+      <button id="s-save" class="btn primary" type="button">Einstellungen speichern</button>
+    </div>
+    <p class="version" id="app-version"></p>
+  </section>
+</main>
+
+<!-- ============ KAMERA ============ -->
+<div id="camera" class="camera" hidden>
+  <video id="cam-video" playsinline muted autoplay></video>
+  <div id="cam-flash" class="cam-flash"></div>
+  <div class="cam-top">
+    <button id="cam-close" class="cam-round" type="button" aria-label="Schließen">✕</button>
+    <span id="cam-info" class="cam-info"></span>
+    <button id="cam-torch" class="cam-round" type="button" aria-label="Licht" hidden>⚡</button>
+  </div>
+  <div id="cam-error" class="cam-error" hidden></div>
+  <div class="cam-bottom">
+    <div id="cam-strip" class="cam-strip"></div>
+    <div class="cam-controls">
+      <span id="cam-count" class="cam-count">0</span>
+      <button id="cam-shutter" class="shutter" type="button" aria-label="Foto aufnehmen"></button>
+      <button id="cam-done" class="cam-done" type="button">Fertig</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BILD-ANSICHT ============ -->
+<div id="lightbox" class="lightbox" hidden>
+  <div class="lb-top">
+    <button id="lb-close" class="cam-round" type="button" aria-label="Schließen">✕</button>
+    <span id="lb-pos" class="cam-info"></span>
+    <button id="lb-delete" class="cam-round" type="button" aria-label="Löschen">🗑</button>
+  </div>
+  <div class="lb-stage">
+    <button id="lb-prev" class="lb-nav" type="button" aria-label="Vorheriges">‹</button>
+    <img id="lb-img" alt="">
+    <button id="lb-next" class="lb-nav" type="button" aria-label="Nächstes">›</button>
+  </div>
+  <div class="lb-bottom">
+    <button id="lb-rot-left" class="btn" type="button">⟲ Links</button>
+    <button id="lb-cover" class="btn" type="button">★ Titelbild</button>
+    <button id="lb-rot-right" class="btn" type="button">⟳ Rechts</button>
+  </div>
+</div>
+
+<!-- ============ AUSWAHL-MENÜ ============ -->
+<div id="sheet" class="sheet" hidden>
+  <div class="sheet-panel" id="sheet-panel"></div>
+</div>
+
+<div id="busy" class="busy" hidden><div class="spinner"></div><span id="busy-text">Bitte warten …</span></div>
+<div id="toast" class="toast" role="status"></div>
+
+<input id="in-gallery" type="file" accept="image/*" multiple hidden>
+<input id="in-syscam" type="file" accept="image/*" capture="environment" hidden>
+<input id="in-backup" type="file" accept="application/json,.json" hidden>
+
+<script src="app.js"></script>
+</body>
+</html>
