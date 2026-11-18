@@ -13,6 +13,8 @@
   --vinted: #09b1ba;
   --kleinanzeigen: #e8641b;
   --ebay: #3665f3;
+  --flinkanzeigen: #1e8e5a;
+  --facebook: #1877f2;
   --radius: 14px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -81,6 +83,8 @@ main { max-width: 640px; margin: 0 auto; padding: 12px 12px calc(96px + var(--sa
 .btn.vinted { background: var(--vinted); color: #fff; }
 .btn.kleinanzeigen { background: var(--kleinanzeigen); color: #fff; }
 .btn.ebay { background: var(--ebay); color: #fff; }
+.btn.flinkanzeigen { background: var(--flinkanzeigen); color: #fff; }
+.btn.facebook { background: var(--facebook); color: #fff; }
 .btn-row { display: flex; gap: 8px; }
 .btn-row > .btn { flex: 1; }
 .btn-row.wrap { flex-wrap: wrap; }
@@ -112,6 +116,8 @@ main { max-width: 640px; margin: 0 auto; padding: 12px 12px calc(96px + var(--sa
 .badge.vinted { background: #e0f7f8; color: #067a80; }
 .badge.kleinanzeigen { background: #fdeee4; color: #a3440d; }
 .badge.ebay { background: #e6ecfe; color: #2347b8; }
+.badge.flinkanzeigen { background: #e3f4ec; color: #15683f; }
+.badge.facebook { background: #e7f0fe; color: #0b5bc4; }
 .badge.sold { background: #e6f4ee; color: var(--ok); }
 .item-actions { grid-column: 1 / -1; display: flex; gap: 6px; }
 .item-actions .btn { flex: 1; }
@@ -162,6 +168,8 @@ main { max-width: 640px; margin: 0 auto; padding: 12px 12px calc(96px + var(--sa
 .site-card.vinted { border-left-color: var(--vinted); }
 .site-card.kleinanzeigen { border-left-color: var(--kleinanzeigen); }
 .site-card.ebay { border-left-color: var(--ebay); }
+.site-card.flinkanzeigen { border-left-color: var(--flinkanzeigen); }
+.site-card.facebook { border-left-color: var(--facebook); }
 .site-card .card-head { margin-bottom: 10px; }
 .site-card .btn-row { margin-top: 8px; }
 .copy-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 8px; }

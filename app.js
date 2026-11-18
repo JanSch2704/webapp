@@ -19,7 +19,9 @@ const SETTINGS_KEY = 'sm-settings';
 const SITES = {
   vinted:        { label: 'Vinted',        url: 'https://www.vinted.de/items/new' },
   kleinanzeigen: { label: 'Kleinanzeigen', url: 'https://www.kleinanzeigen.de/p-anzeige-aufgeben-schritt2.html' },
-  ebay:          { label: 'eBay',          url: 'https://www.ebay.de/sl/sell' }
+  ebay:          { label: 'eBay',          url: 'https://www.ebay.de/sl/sell' },
+  flinkanzeigen: { label: 'Flinkanzeigen', url: 'https://flinkanzeigen.de/anzeige-erstellen' },
+  facebook:      { label: 'Facebook Marketplace', url: 'https://www.facebook.com/marketplace/create/item' }
 };
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -531,6 +533,7 @@ function compareLinks(q) {
     ebay: `https://www.ebay.de/sch/i.html?_nkw=${e}&LH_Sold=1&LH_Complete=1`,
     kleinanzeigen: `https://www.kleinanzeigen.de/s-${ka}/k0`,
     vinted: `https://www.vinted.de/catalog?search_text=${e}`,
+    facebook: `https://www.facebook.com/marketplace/search?query=${e}`,
     idealo: `https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=${e}`
   };
 }
